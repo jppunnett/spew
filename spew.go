@@ -2,33 +2,50 @@
 package main
 
 import (
+	"os"
+	"io"
+	"strings"
 	"fmt"
 )
 
-const NPREFIX = 2
 const NOWORD = "\n"
+const NPREFIX = 2
 
-type Prefix struct {
+type Phrase struct {
 	prefix []string
-}
-
-type Suffix struct {
 	suffix []string
 }
 
+func (p *Phrase) GetKey() string {
+	return strings.Join(p.prefix, "+")
+}
+
+func newPhrase(word string, nprefix int) *Phrase {
+	var phrase Phrase
+	phrase.prefix = make([]string, nprefix)
+	for i := range phrase.prefix {
+		phrase.prefix[i] = word
+	}
+	return &phrase
+}
+
+type MarkovChain struct {
+	chain map[string]*Phrase
+}
+
+func (mc *MarkovChain) Build(input io.Reader) {
+	mc.chain = make(map[string]*Phrase)
+
+	phrase := newPhrase(NOWORD, NPREFIX)
+	mc.chain[phrase.GetKey()] = phrase
+}
+
+func (mc *MarkovChain) Generate(count int) {
+	fmt.Println(mc.chain)
+}
+
 func main() {
-	fmt.Println("Ready to spew!")
-	markovChain := build()
-	// spew(markovChain, 50)
+	var chain MarkovChain
+	chain.Build(os.Stdin)
+	chain.Generate(50)
 }
-
-func build() map[Prefix]Suffix {
-	// chain := make(map[string]Suffix)
-	var chain map[Prefix]Suffix
-	return chain
-}
-
-// func spew(chain map[Prefix]Suffix, count int) {
-// 	fmt.Printf("chain: %v\n", chain)
-// 	fmt.Printf("count: %v\n", counts)
-// }

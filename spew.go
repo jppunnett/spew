@@ -41,7 +41,7 @@ func (mc *MarkovChain) Build(input io.Reader) {
 }
 
 func (mc *MarkovChain) Generate(count int) {
-	fmt.Println(mc.chain)
+	fmt.Println(count, mc.chain)
 }
 
 func main() {

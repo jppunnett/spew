@@ -6,6 +6,8 @@ import (
 	"io"
 	"strings"
 	"fmt"
+	"bufio"
+	"log"
 )
 
 const NOWORD = "\n"
@@ -31,13 +33,27 @@ func newPhrase(word string, nprefix int) *Phrase {
 
 type MarkovChain struct {
 	chain map[string]*Phrase
+	phrase *Phrase
+}
+
+func (mc *MarkovChain) add(word string) {
+	// Find existing phrase
+
 }
 
 func (mc *MarkovChain) Build(input io.Reader) {
 	mc.chain = make(map[string]*Phrase)
+	mc.phrase = newPhrase(NOWORD, NPREFIX)
 
-	phrase := newPhrase(NOWORD, NPREFIX)
-	mc.chain[phrase.GetKey()] = phrase
+	var s *bufio.Scanner = bufio.NewScanner(input)
+	s.Split(bufio.ScanWords)
+	for s.Scan() {
+		mc.add(s.Text()) 
+	}
+
+	if err := s.Err(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (mc *MarkovChain) Generate(count int) {

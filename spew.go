@@ -7,10 +7,13 @@ import (
 	"fmt"
 	"bufio"
 	"log"
+	"math/rand"
+	"time"
 )
 
-const NOWORD = "\n"
+const NOWORD = "**"
 const NPREF = 2
+const MAXGEN = 50
 
 type Prefix = [NPREF]string
 type Suffix = []string
@@ -32,17 +35,47 @@ func build(input io.Reader) {
 		chain[prefix] = append(chain[prefix], word)
 
 		// Shift prefix elements to the left to make room for word
-		s := prefix[:]
-		copy(s, s[1:])
-		s[NPREF-1] = word
+		copy(prefix[:], prefix[1:])
+		prefix[NPREF-1] = word
 	}
+
+	// Add sentinel to suffix of "last" prefix
+	chain[prefix] = append(chain[prefix], NOWORD)
 
 	if err := s.Err(); err != nil {
 		log.Fatal(err)
 	}
 }
 
+func spew(count int) {
+	prefix := Prefix{}
+	for i := range prefix {
+		prefix[i] = NOWORD
+	}
+
+	// Build non-deterministic random number generator which we will use to
+	// choose suffixs.
+	rsrc := rand.NewSource(time.Now().UnixNano())
+	rgen := rand.New(rsrc)
+
+	for count > 0 {
+		suffix := chain[prefix]
+		word := suffix[rgen.Intn(len(suffix))]
+		if word == NOWORD {
+			break
+		}
+		fmt.Println(word)
+
+		// Shift prefix elements to the left to make room for word
+		copy(prefix[:], prefix[1:])
+		prefix[NPREF-1] = word
+
+		count--
+	}
+
+}
+
 func main() {
 	build(os.Stdin)
-	fmt.Println(chain)
+	spew(MAXGEN)
 }

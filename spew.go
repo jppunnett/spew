@@ -2,12 +2,12 @@
 package main
 
 import (
-	"os"
-	"io"
-	"fmt"
 	"bufio"
+	"fmt"
+	"io"
 	"log"
 	"math/rand"
+	"os"
 	"time"
 )
 

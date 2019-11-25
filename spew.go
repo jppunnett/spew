@@ -4,51 +4,37 @@ package main
 import (
 	"os"
 	"io"
-	"strings"
 	"fmt"
 	"bufio"
 	"log"
 )
 
 const NOWORD = "\n"
-const NPREFIX = 2
+const NPREF = 2
 
-type Phrase struct {
-	prefix []string
-	suffix []string
-}
+type Prefix = [NPREF]string
+type Suffix = []string
 
-func (p *Phrase) GetKey() string {
-	return strings.Join(p.prefix, "+")
-}
+var chain map[Prefix]Suffix
 
-func newPhrase(word string, nprefix int) *Phrase {
-	var phrase Phrase
-	phrase.prefix = make([]string, nprefix)
-	for i := range phrase.prefix {
-		phrase.prefix[i] = word
+func build(input io.Reader) {
+	chain = make(map[Prefix]Suffix)
+
+	prefix := Prefix{}
+	for i := range prefix {
+		prefix[i] = NOWORD
 	}
-	return &phrase
-}
-
-type MarkovChain struct {
-	chain map[string]*Phrase
-	phrase *Phrase
-}
-
-func (mc *MarkovChain) add(word string) {
-	// Find existing phrase
-
-}
-
-func (mc *MarkovChain) Build(input io.Reader) {
-	mc.chain = make(map[string]*Phrase)
-	mc.phrase = newPhrase(NOWORD, NPREFIX)
 
 	var s *bufio.Scanner = bufio.NewScanner(input)
 	s.Split(bufio.ScanWords)
 	for s.Scan() {
-		mc.add(s.Text()) 
+		word := s.Text()
+		chain[prefix] = append(chain[prefix], word)
+
+		// Shift prefix elements to the left to make room for word
+		s := prefix[:]
+		copy(s, s[1:])
+		s[NPREF-1] = word
 	}
 
 	if err := s.Err(); err != nil {
@@ -56,12 +42,7 @@ func (mc *MarkovChain) Build(input io.Reader) {
 	}
 }
 
-func (mc *MarkovChain) Generate(count int) {
-	fmt.Println(count, mc.chain)
-}
-
 func main() {
-	var chain MarkovChain
-	chain.Build(os.Stdin)
-	chain.Generate(50)
+	build(os.Stdin)
+	fmt.Println(chain)
 }

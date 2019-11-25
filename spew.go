@@ -11,9 +11,9 @@ import (
 	"time"
 )
 
-const NOWORD = "**"
+const NOWORD = "\n"
 const NPREF = 2
-const MAXGEN = 50
+const MAXGEN = 100
 
 type Prefix = [NPREF]string
 type Suffix = []string
@@ -72,7 +72,6 @@ func spew(count int) {
 
 		count--
 	}
-
 }
 
 func main() {
